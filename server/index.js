@@ -40,18 +40,42 @@ app.post('/upload', upload.single('resume'), async (req, res) => {
       return res.status(400).json({ error: 'Could not extract any text from the provided PDF.' });
     }
 
-    const prompt = `Extract the following fields from this resume text and return structured JSON match the exact schema requested:
+    const prompt = `Extract the following fields from this resume text and return structured JSON matching the exact schema requested:
+
+{
+  "name": "string",
+  "email": "string",
+  "phone": "string",
+  "linkedin": "string",
+  "github": "string",
+  "summary": "string",
+  "skills": ["string"],
+  "education": [
     {
-      "name": "string",
-      "email": "string",
-      "phone": "string",
-      "summary": "string",
-      "skills": ["string"],
-      "education": [{"degree": "string", "institution": "string", "startYear": "string", "endYear": "string"}],
-      "experience": [{"title": "string", "company": "string", "startDate": "string", "endDate": "string", "description": "string"}]
+      "degree": "string",
+      "institution": "string",
+      "startYear": "string",
+      "endYear": "string"
     }
-    
-    Resume text:\n\n${text}`;
+  ],
+  "experience": [
+    {
+      "title": "string",
+      "company": "string",
+      "startDate": "string",
+      "endDate": "string",
+      "description": "string"
+    }
+  ]
+}
+
+Rules:
+- Extract "linkedin" only if a LinkedIn profile URL is found in the resume; otherwise return an empty string "".
+- Extract "github" only if a GitHub profile URL is found in the resume; otherwise return an empty string "".
+- Ensure valid JSON output only.
+- Do not add extra fields outside the schema.
+
+Resume text:\n\n${text}`;
 
     if (!GEMINI_API_KEY) {
       return res.status(500).json({ error: 'GEMINI_API_KEY not configured on server' });
